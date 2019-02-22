@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { Component } from 'react'
 import classnames from 'classnames'
 //
@@ -8,6 +10,8 @@ import defaultProps from './defaultProps'
 import propTypes from './propTypes'
 
 export const ReactTableDefaults = defaultProps
+
+let MemoizedTable;
 
 export default class ReactTable extends Methods(Lifecycle(Component)) {
   static propTypes = propTypes
@@ -820,8 +824,11 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
       )
     }
 
+
+
     const makeTable = () => {
-      return (
+      return (props) => {
+        return (
         <div
           className={classnames('ReactTable', className, rootProps.className)}
           style={{
@@ -849,7 +856,7 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
               }}
               {...tBodyProps.rest}
             >
-              {pageRows.map((d, i) => makePageRow(d, i))}
+              {props.pageRows.map((d, i) => makePageRow(d, i))}
               {padRows.map(makePadRow)}
             </TbodyComponent>
             {hasColumnFooter ? makeColumnFooters() : null}
@@ -862,10 +869,14 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
           )}
           <LoadingComponent loading={loading} loadingText={loadingText} {...loadingProps} />
         </div>
-      )
+      )}
+    }
+
+    if (!MemoizedTable) {
+      MemoizedTable = makeTable();
     }
 
     // childProps are optionally passed to a function-as-a-child
-    return children ? children(finalState, makeTable, this) : makeTable()
+    return children ? children(finalState, makeTable, this) : <MemoizedTable pageRows={pageRows} />;
   }
 }
